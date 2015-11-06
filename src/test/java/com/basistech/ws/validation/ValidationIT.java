@@ -41,6 +41,7 @@ import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.CoreOptions.when;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.configureConsole;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.debugConfiguration;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
@@ -108,12 +109,14 @@ public class ValidationIT {
                 logLevel(LogLevelOption.LogLevel.INFO),
                 features(
                         maven().groupId("com.basistech.ws").artifactId("bean-validation-feature")
-                                .version(projectVersion).classifier("features").type("xml")
+                                .version(projectVersion).classifier("features").type("xml"),
+                        "bean-validation-feature"
                 ),
                 when(karafDebug).useOptions(debugConfiguration()),
                 junitBundles(),
                 systemProperty("pax.exam.osgi.unresolved.fail").value("true"),
-                systemProperty("org.ops4j.pax.exam.rbc.rmi.host").value("localhost")
+                systemProperty("org.ops4j.pax.exam.rbc.rmi.host").value("localhost"),
+                editConfigurationFilePut("etc/org.ops4j.pax.url.mvn.cfg", "org.ops4j.pax.url.mvn.defaultLocalRepoAsRemote", "true")
         );
     }
 
