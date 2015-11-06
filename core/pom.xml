@@ -9,6 +9,7 @@
         <groupId>com.basistech.ws</groupId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
+    <description>A Karaf feature that provides JSR 303 validation via Apache Bval.</description>
     <build>
         <plugins>
             <plugin>

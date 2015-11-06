@@ -29,10 +29,15 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 import org.osgi.framework.Constants;
 
 import javax.inject.Inject;
+import javax.validation.Validator;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Properties;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.maven;
@@ -60,19 +65,10 @@ public class ValidationIT {
     static String projectVersion;
     static boolean karafDebug;
 
-    static {
-        try {
-            // this can't be a junit BeforeClass, it has to run before @Configuration.
-            beforeClass();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     @Inject
     BeanValidation validation;
 
-    public static void beforeClass() throws Exception {
+    private static void loadProps() throws Exception {
         URL configPropUrl = Resources.getResource(ValidationIT.class, "test-config.properties");
         Properties props = new Properties();
         try (InputStream propStream = configPropUrl.openStream()) {
@@ -91,7 +87,8 @@ public class ValidationIT {
     }
 
     @Configuration
-    public Option[] configure() {
+    public Option[] configure() throws Exception {
+        loadProps();
         karafDebug = false;
 
         return options(karafDistributionConfiguration()
@@ -108,10 +105,16 @@ public class ValidationIT {
                 configureConsole().ignoreLocalConsole(),
                 logLevel(LogLevelOption.LogLevel.INFO),
                 features(
-                        maven().groupId("com.basistech.ws").artifactId("bean-validation-feature")
+                        maven().groupId("com.basistech.ws").artifactId("bean-validation-feature-core")
                                 .version(projectVersion).classifier("features").type("xml"),
-                        "bean-validation-feature"
+                        "bean-validation-feature-core"
                 ),
+                features(maven().groupId("org.apache.karaf.features")
+                        .artifactId("standard")
+                        .version(karafVersion)
+                        .classifier("features")
+                        .type("xml"),
+                        "scr"),
                 when(karafDebug).useOptions(debugConfiguration()),
                 junitBundles(),
                 systemProperty("pax.exam.osgi.unresolved.fail").value("true"),
@@ -124,5 +127,18 @@ public class ValidationIT {
     public void getValidators() throws Exception {
         // if it doesn't throw, we're fairly happy.
         validation.createValidator();
+        ExecutorService threadPool = Executors.newFixedThreadPool(2);
+        for (int x = 0; x < 1000; x++) {
+            Callable<Validator> task = new Callable<Validator>() {
+                @Override
+                public Validator call() throws Exception {
+                    return validation.createValidator();
+                }
+            };
+            Future<Validator> validator1 = threadPool.submit(task);
+            Future<Validator> validator2 = threadPool.submit(task);
+            validator1.get();
+            validator2.get();
+        }
     }
 }
