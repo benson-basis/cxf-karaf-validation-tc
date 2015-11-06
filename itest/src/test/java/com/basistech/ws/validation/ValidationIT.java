@@ -105,9 +105,9 @@ public class ValidationIT {
                 configureConsole().ignoreLocalConsole(),
                 logLevel(LogLevelOption.LogLevel.INFO),
                 features(
-                        maven().groupId("com.basistech.ws").artifactId("bean-validation-feature-core")
+                        maven().groupId("com.basistech.ws").artifactId("bean-validation-feature")
                                 .version(projectVersion).classifier("features").type("xml"),
-                        "bean-validation-feature-core"
+                        "bean-validation-feature"
                 ),
                 features(maven().groupId("org.apache.karaf.features")
                         .artifactId("standard")
