@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>text-extractor</artifactId>
-    <version>1.14.1-SNAPSHOT</version>
-    <name>text-extractor</name>
+    <artifactId>bean-validation-feature</artifactId>
+    <groupId>com.basistech.ws</groupId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>bean-validation-feature</name>
     <packaging>bundle</packaging>
     <parent>
         <groupId>com.basistech</groupId>
@@ -11,8 +12,8 @@
         <version>57.2.4</version>
     </parent>
     <scm>
-        <connection>scm:git:git@git.basistech.net:textanalytics/text-extractor.git</connection>
-        <developerConnection>scm:git:git@git.basistech.net:textanalytics/text-extractor.git</developerConnection>
+        <connection>scm:git:git@git.basistech.net:raas/bean-validation-feature.git</connection>
+        <developerConnection>scm:git:git@git.basistech.net:raas/bean-validation-feature.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
     <inceptionYear>2014</inceptionYear>
@@ -21,74 +22,24 @@
         <url>http://jira.basistech.net/browse/WS</url>
     </issueManagement>
     <properties>
-        <http-components-version>4.4.1</http-components-version>
         <java.version>1.7</java.version>
-        <tika.version>1.10</tika.version>
         <skip-dependency-convergence>true</skip-dependency-convergence>
+        <karaf-version>4.0.2</karaf-version>
+        <pax-exam-version>4.6.0</pax-exam-version>
     </properties>
     <build>
         <defaultGoal>install</defaultGoal>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>buildnumber-maven-plugin</artifactId>
-                    <version>1.1</version>
-                    <executions>
-                        <execution>
-                            <phase>validate</phase>
-                            <goals>
-                                <goal>create</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <configuration>
-                        <doCheck>false</doCheck>
-                        <shortRevisionLength>8</shortRevisionLength>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-site-plugin</artifactId>
-                    <version>3.2</version>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.apache.maven.doxia</groupId>
-                            <artifactId>doxia-module-markdown</artifactId>
-                            <version>1.3</version>
-                        </dependency>
-                    </dependencies>
-                    <configuration>
-                        <chmod>true</chmod>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-javadoc-plugin</artifactId>
-                    <executions>
-                        <execution>
-                            <id>javadoc-jar</id>
-                            <goals>
-                                <goal>jar</goal>
-                            </goals>
-                            <phase>package</phase>
-                            <configuration>
-                                <attach>true</attach>
-                                <quiet>true</quiet>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>versions-maven-plugin</artifactId>
-                    <version>1.2</version>
-                    <configuration>
-                        <generateBackupPoms>false</generateBackupPoms>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>true</filtering>
+            </testResource>
+            <testResource>
+                <directory>src/test/webapp</directory>
+                <targetPath>${basedir}/target/${project.artifactId}</targetPath>
+                <filtering>false</filtering>
+            </testResource>
+        </testResources>
         <plugins>
             <plugin>
                 <groupId>com.basistech</groupId>
@@ -123,15 +74,32 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <!-- No exported packages; just services. -->
                         <Bundle-Version>${osgi-version}</Bundle-Version>
-                        <Embed-Dependency>boilerpipe;nekohtml</Embed-Dependency>
+                        <_dsannotations>*</_dsannotations>
                         <!-- It's a bit surprising that this has to be explicit.-->
                         <Include-Resource>
                             {META-INF/maven/dependencies.properties=${project.build.directory}/classes/META-INF/maven/dependencies.properties};{maven-resources}
                         </Include-Resource>
                     </instructions>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-maven-plugin</artifactId>
+                <version>${karaf-version}</version>
+                <executions>
+                    <execution>
+                        <id>feature</id>
+                        <goals>
+                            <goal>features-generate-descriptor</goal>
+                        </goals>
+                        <configuration>
+                            <includeProjectArtifact>true</includeProjectArtifact>
+                            <ignoreScopeProvided>true</ignoreScopeProvided>
+                            <aggregateFeatures>false</aggregateFeatures>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <!-- This plugin overrides deploy -->
@@ -145,34 +113,6 @@
                     <!-- ID for text-analytics staging profile -->
                     <stagingProfileId>1dd11ca8866422</stagingProfileId>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
-                <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy</id>
-                        <phase>generate-test-resources</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/bundles</outputDirectory>
-                            <excludeGroupIds>org.slf4j,org.osgi</excludeGroupIds>
-                            <excludeArtifactIds>xercesImpl,xml-apis,boilerpipe,nekohtml</excludeArtifactIds>
-                            <includeScope>compile</includeScope>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -194,6 +134,10 @@
                             <classpathDependencyExcludes>
                                 <classpathDependencyExclude>org.osgi:org.osgi.core</classpathDependencyExclude>
                                 <classpathDependencyExclude>org.osgi:org.osgi.compendium</classpathDependencyExclude>
+                                <classpathDependencyExclude>org.apache.karaf:org.apache.karaf.client</classpathDependencyExclude>
+                                <classpathDependencyExclude>org.jboss.logging:jboss-logging</classpathDependencyExclude>
+                                <classpathDependencyExclude>org.ops4j.pax.logging:pax-logging-service</classpathDependencyExclude>
+                                <classpathDependencyExclude>org.ops4j.pax.logging:pax-logging-api</classpathDependencyExclude>
                             </classpathDependencyExcludes>
                         </configuration>
                     </execution>
@@ -202,28 +146,6 @@
         </plugins>
     </build>
     <dependencies>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.tika</groupId>
-            <artifactId>tika-bundle</artifactId>
-            <version>${tika.version}</version>
-            <exclusions>
-                <exclusion>
-                    <!-- exclude this version so we can use a newer one, see dependency below -->
-                    <!-- back this out when Tika catches up -->
-                    <groupId>de.l3s.boilerpipe</groupId>
-                    <artifactId>boilerpipe</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.syncthemall</groupId>
-            <artifactId>boilerpipe</artifactId>
-            <version>1.2.2-basis-1</version>
-        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -264,24 +186,6 @@
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.xmlresolver</artifactId>
             <version>1.2_5</version>
-        </dependency>
-        <dependency>
-            <groupId>net.sourceforge.nekohtml</groupId>
-            <artifactId>nekohtml</artifactId>
-            <version>1.9.21</version>
-        </dependency>
-        <dependency>
-            <groupId>com.basistech</groupId>
-            <artifactId>adm-model</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-            <version>2.6</version>
         </dependency>
         <dependency>
             <groupId>org.apache.bval</groupId>
@@ -330,6 +234,12 @@
             <artifactId>pax-exam-test-composite</artifactId>
             <version>0.0.5</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.ops4j.pax.exam</groupId>
+                    <artifactId>pax-exam-container-native</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>javax.inject</groupId>
@@ -348,6 +258,24 @@
             <artifactId>org.osgi.core</artifactId>
             <version>5.0.0</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>apache-karaf</artifactId>
+            <version>${karaf-version}</version>
+            <type>zip</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.exam</groupId>
+            <artifactId>pax-exam-container-karaf</artifactId>
+            <version>${pax-exam-version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>
