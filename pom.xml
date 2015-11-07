@@ -28,7 +28,7 @@
         <pax-exam-version>4.6.0</pax-exam-version>
     </properties>
     <modules>
-        <module>core</module>
+        <module>support</module>
         <module>itest</module>
     </modules>
     <build>

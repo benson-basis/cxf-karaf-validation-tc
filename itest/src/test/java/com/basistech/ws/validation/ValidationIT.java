@@ -14,7 +14,7 @@
 
 package com.basistech.ws.validation;
 
-import com.basistech.ws.beanvalidation.BeanValidation;
+import com.basistech.ws.beanvalidation.OSGIValidationFactory;
 import com.google.common.io.Resources;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,8 +28,8 @@ import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 import org.osgi.framework.Constants;
 
-import javax.inject.Inject;
 import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
@@ -46,7 +46,6 @@ import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.CoreOptions.when;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.configureConsole;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.debugConfiguration;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
@@ -64,9 +63,6 @@ public class ValidationIT {
     static String basedir;
     static String projectVersion;
     static boolean karafDebug;
-
-    @Inject
-    BeanValidation validation;
 
     private static void loadProps() throws Exception {
         URL configPropUrl = Resources.getResource(ValidationIT.class, "test-config.properties");
@@ -104,35 +100,38 @@ public class ValidationIT {
                 keepRuntimeFolder(),
                 configureConsole().ignoreLocalConsole(),
                 logLevel(LogLevelOption.LogLevel.INFO),
-                features(
-                        maven().groupId("com.basistech.ws").artifactId("bean-validation-feature")
-                                .version(projectVersion).classifier("features").type("xml"),
-                        "bean-validation-feature"
-                ),
-                features(maven().groupId("org.apache.karaf.features")
-                        .artifactId("standard")
-                        .version(karafVersion)
+                features(maven().groupId("com.basistech.ws")
+                        .artifactId("bean-validation-support")
+                        .version(projectVersion)
                         .classifier("features")
                         .type("xml"),
-                        "scr"),
+                        "bean-validation-support"),
+                features(maven().groupId("org.apache.karaf.features")
+                                .artifactId("enterprise")
+                                .version(karafVersion)
+                                .classifier("features")
+                                .type("xml"),
+                        "hibernate-validator"),
                 when(karafDebug).useOptions(debugConfiguration()),
                 junitBundles(),
                 systemProperty("pax.exam.osgi.unresolved.fail").value("true"),
-                systemProperty("org.ops4j.pax.exam.rbc.rmi.host").value("localhost"),
-                editConfigurationFilePut("etc/org.ops4j.pax.url.mvn.cfg", "org.ops4j.pax.url.mvn.defaultLocalRepoAsRemote", "true")
+                systemProperty("org.ops4j.pax.exam.rbc.rmi.host").value("localhost")
         );
     }
 
     @Test
     public void getValidators() throws Exception {
+        final ValidatorFactory factory = OSGIValidationFactory.newHibernateValidatorFactory();
+        factory.getValidator();
+
         // if it doesn't throw, we're fairly happy.
-        validation.createValidator();
+        factory.getValidator();
         ExecutorService threadPool = Executors.newFixedThreadPool(2);
         for (int x = 0; x < 1000; x++) {
             Callable<Validator> task = new Callable<Validator>() {
                 @Override
                 public Validator call() throws Exception {
-                    return validation.createValidator();
+                    return factory.getValidator();
                 }
             };
             Future<Validator> validator1 = threadPool.submit(task);
