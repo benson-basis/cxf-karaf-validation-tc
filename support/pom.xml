@@ -40,14 +40,6 @@
                             <includeProjectArtifact>true</includeProjectArtifact>
                             <ignoreScopeProvided>true</ignoreScopeProvided>
                             <aggregateFeatures>false</aggregateFeatures>
-                            <excludedArtifactIds>
-                                <excludedArtifactId>validation-api</excludedArtifactId>
-                                <excludedArtifactId>classmate</excludedArtifactId>
-                                <excludedArtifactId>javax.el-api</excludedArtifactId>
-                                <excludedArtifactId>javax.el</excludedArtifactId>
-                                <excludedArtifactId>jboss-logging</excludedArtifactId>
-                                <excludedArtifactId>hibernate-validator</excludedArtifactId>
-                            </excludedArtifactIds>
                         </configuration>
                     </execution>
                 </executions>
