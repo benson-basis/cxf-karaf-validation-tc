@@ -14,7 +14,7 @@
 
 package com.basistech.ws.beanvalidation;
 
-import org.hibernate.validator.HibernateValidator;
+import org.apache.bval.jsr.ApacheValidationProvider;
 
 import javax.validation.Validation;
 import javax.validation.ValidationProviderResolver;
@@ -36,12 +36,12 @@ public final class OSGIValidationFactory {
         @Override
         public List<ValidationProvider<?>> getValidationProviders() {
             List<ValidationProvider<?>> providers = new ArrayList<>();
-            providers.add(new HibernateValidator());
+            providers.add(new ApacheValidationProvider());
             return providers;
         }
     }
 
-    public static ValidatorFactory newHibernateValidatorFactory() {
+    public static ValidatorFactory newValidatorFactory() {
         javax.validation.Configuration<?> config = Validation.byDefaultProvider()
                 .providerResolver(new OSGIServiceDiscoverer())
                 .configure();

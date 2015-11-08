@@ -106,12 +106,6 @@ public class ValidationIT {
                         .classifier("features")
                         .type("xml"),
                         "bean-validation-support"),
-                features(maven().groupId("org.apache.karaf.features")
-                                .artifactId("enterprise")
-                                .version(karafVersion)
-                                .classifier("features")
-                                .type("xml"),
-                        "hibernate-validator"),
                 when(karafDebug).useOptions(debugConfiguration()),
                 junitBundles(),
                 systemProperty("pax.exam.osgi.unresolved.fail").value("true"),
@@ -121,7 +115,7 @@ public class ValidationIT {
 
     @Test
     public void getValidators() throws Exception {
-        final ValidatorFactory factory = OSGIValidationFactory.newHibernateValidatorFactory();
+        final ValidatorFactory factory = OSGIValidationFactory.newValidatorFactory();
         factory.getValidator();
 
         // if it doesn't throw, we're fairly happy.
