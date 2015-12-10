@@ -10,6 +10,16 @@
     </parent>
     <packaging>bundle</packaging>
     <description>Helper code for the Karaf Hibernate validation feature.</description>
+    <properties>
+        <hibernate-validator.version>5.0.3.Final</hibernate-validator.version>
+        <org.apache.servicemix.bundles_org.apache.servicemix.bundles.cglib.version>3.0_1</org.apache.servicemix.bundles_org.apache.servicemix.bundles.cglib.version>
+        <org.hibernate_hibernate-validator.version>${hibernate-validator.version}</org.hibernate_hibernate-validator.version>
+        <org.jboss.logging_jboss-logging.version>3.1.3.GA</org.jboss.logging_jboss-logging.version>
+        <javax.el_javax.el-api.version>3.0.0</javax.el_javax.el-api.version>
+        <org.apache.servicemix.bundles_org.apache.servicemix.bundles.aspectj.version>1.8.0_1</org.apache.servicemix.bundles_org.apache.servicemix.bundles.aspectj.version>
+        <javax.validation_validation-api.version>1.1.0.Final</javax.validation_validation-api.version>
+        <com.fasterxml_classmate.version>1.1.0</com.fasterxml_classmate.version>
+    </properties>
     <build>
         <plugins>
             <plugin>
@@ -47,51 +57,17 @@
         </plugins>
     </build>
     <dependencies>
+
+        <dependency>
+            <groupId>net.osgiliath.framework</groupId>
+            <artifactId>net.osgiliath.helper.validation.osgi.services</artifactId>
+            <version>0.2.3</version>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
             <version>1.1.0.Final</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.el</groupId>
-            <artifactId>javax.el-api</artifactId>
-            <version>2.2.4</version>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.web</groupId>
-            <artifactId>javax.el</artifactId>
-            <version>2.2.4</version>
-        </dependency>
-        <!-- Bval and all of its friends and dependencies. -->
-        <dependency>
-            <groupId>commons-validator</groupId>
-            <artifactId>commons-validator</artifactId>
-            <version>1.4.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.3.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-weaver-privilizer-api</artifactId>
-            <version>1.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.bval</groupId>
-            <artifactId>org.apache.bval.bundle</artifactId>
-            <version>1.1.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.bval</groupId>
-                    <artifactId>bval-core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.bval</groupId>
-                    <artifactId>bval-jsr</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
     </dependencies>
 </project>

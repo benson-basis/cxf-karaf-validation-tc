@@ -115,17 +115,15 @@ public class ValidationIT {
 
     @Test
     public void getValidators() throws Exception {
-        final ValidatorFactory factory = OSGIValidationFactory.newValidatorFactory();
-        factory.getValidator();
+        OSGIValidationFactory.newValidator();
 
         // if it doesn't throw, we're fairly happy.
-        factory.getValidator();
         ExecutorService threadPool = Executors.newFixedThreadPool(2);
         for (int x = 0; x < 1000; x++) {
             Callable<Validator> task = new Callable<Validator>() {
                 @Override
                 public Validator call() throws Exception {
-                    return factory.getValidator();
+                    return OSGIValidationFactory.newValidator();
                 }
             };
             Future<Validator> validator1 = threadPool.submit(task);

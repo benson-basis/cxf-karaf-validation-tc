@@ -14,14 +14,9 @@
 
 package com.basistech.ws.beanvalidation;
 
-import org.apache.bval.jsr.ApacheValidationProvider;
+import net.osgiliath.validator.osgi.ValidatorHelper;
 
-import javax.validation.Validation;
-import javax.validation.ValidationProviderResolver;
-import javax.validation.ValidatorFactory;
-import javax.validation.spi.ValidationProvider;
-import java.util.ArrayList;
-import java.util.List;
+import javax.validation.Validator;
 
 /**
  * utility class for using hibernate validation in OSGi.
@@ -31,21 +26,7 @@ public final class OSGIValidationFactory {
         //
     }
 
-    static class OSGIServiceDiscoverer implements ValidationProviderResolver {
-
-        @Override
-        public List<ValidationProvider<?>> getValidationProviders() {
-            List<ValidationProvider<?>> providers = new ArrayList<>();
-            providers.add(new ApacheValidationProvider());
-            return providers;
-        }
-    }
-
-    public static ValidatorFactory newValidatorFactory() {
-        javax.validation.Configuration<?> config = Validation.byDefaultProvider()
-                .providerResolver(new OSGIServiceDiscoverer())
-                .configure();
-
-        return config.buildValidatorFactory();
+    public static Validator newValidator() {
+        return ValidatorHelper.getValidator();
     }
 }
