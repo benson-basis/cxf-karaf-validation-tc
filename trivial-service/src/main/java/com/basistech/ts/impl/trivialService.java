@@ -16,10 +16,10 @@
 
 package com.basistech.ts.impl;
 
+import com.basistech.ws.beanvalidation.OSGIValidationFactory;
 import org.apache.cxf.endpoint.Server;
 import org.apache.cxf.jaxrs.JAXRSServerFactoryBean;
 import org.apache.cxf.jaxrs.impl.WebApplicationExceptionMapper;
-import org.apache.cxf.validation.BeanValidationProvider;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -29,7 +29,6 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.ws.rs.GET;
 import javax.ws.rs.core.Response;
-import javax.xml.ws.WebServiceException;
 import java.util.Collections;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -47,15 +46,14 @@ public class TrivialService {
 
         ToValidate tv = new ToValidate(0);
         try {
-            new BeanValidationProvider().validateBean(tv);
+            OSGIValidationFactory.newProvider().validateBean(tv);
         } catch (ConstraintViolationException cve) {
             StringBuilder violationMessages = new StringBuilder();
             for (ConstraintViolation<?> constraintViolation : cve.getConstraintViolations()) {
                 violationMessages.append(constraintViolation.getPropertyPath())
                         .append(": ").append(constraintViolation.getMessage()).append("\n");
             }
-            throw new WebServiceException(violationMessages.toString());
-
+            return Response.status(Response.Status.BAD_REQUEST).type("text/plain").entity(violationMessages.toString()).build();
         }
         return Response.ok().build();
     }

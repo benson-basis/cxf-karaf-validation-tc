@@ -27,6 +27,7 @@ import org.ops4j.pax.exam.karaf.options.LogLevelOption;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 
+import javax.validation.ConstraintViolationException;
 import java.io.File;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -94,7 +95,7 @@ public class ValidationIT {
         );
     }
 
-    @Test
+    @Test(expected = ConstraintViolationException.class)
     public void getValidators() throws Exception {
         BeanValidationProvider prov = OSGIValidationFactory.newProvider();
         ToValidate tv = new ToValidate(0);
@@ -109,6 +110,6 @@ public class ValidationIT {
         connection.setRequestMethod("GET");
         connection.connect();
         int code = connection.getResponseCode();
-        Assert.assertEquals(200, code);
+        Assert.assertEquals(400, code); // BAD_REQUEST due to validation error
     }
 }

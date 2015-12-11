@@ -20,14 +20,61 @@ import org.hibernate.validator.HibernateValidator;
 import org.hibernate.validator.HibernateValidatorConfiguration;
 
 import javax.validation.Validation;
+import javax.validation.ValidationProviderResolver;
 import javax.validation.ValidatorFactory;
 import javax.validation.bootstrap.ProviderSpecificBootstrap;
+import javax.validation.spi.ValidationProvider;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * utility class for using hibernate validation in OSGi.
  */
 public final class OSGIValidationFactory {
     static ValidatorFactory validatorFactory;
+
+    static final class HibernateValidationOSGIServicesProviderResolver implements ValidationProviderResolver {
+        /**
+         * Singleton instance.
+         */
+        private static ValidationProviderResolver instance;
+        /**
+         * Validation providers.
+         */
+        private final transient List<ValidationProvider<?>> providers = new ArrayList<>();
+
+        /**
+         * private CTor.
+         */
+        private HibernateValidationOSGIServicesProviderResolver() {
+            super();
+
+        }
+
+        /**
+         * Singleton.
+         *
+         * @return the Singleton instance
+         */
+        public static synchronized ValidationProviderResolver getInstance() {
+            if (instance == null) {
+                instance = new HibernateValidationOSGIServicesProviderResolver();
+                ((HibernateValidationOSGIServicesProviderResolver) instance).providers
+                        .add(new HibernateValidator());
+            }
+            return instance;
+        }
+
+        /**
+         * gets providers.
+         * @return the validation providers
+         */
+        @Override
+        public List<ValidationProvider<?>> getValidationProviders() {
+            return this.providers;
+        }
+
+    }
 
     private OSGIValidationFactory() {
         //
@@ -38,25 +85,30 @@ public final class OSGIValidationFactory {
      * @return the singleton validatorfactory
      */
     public static synchronized ValidatorFactory getValidatorFactory() {
-        if (validatorFactory == null) {
-            final ProviderSpecificBootstrap<HibernateValidatorConfiguration> validationBootStrap = Validation
-                    .byProvider(HibernateValidator.class);
+        ClassLoader oldTccl = Thread.currentThread().getContextClassLoader();
+        try {
+            // our bundle class loader should have wstx in it, which Hibernate seems to want.
+            Thread.currentThread().setContextClassLoader(OSGIValidationFactory.class.getClassLoader());
+            if (validatorFactory == null) {
+                final ProviderSpecificBootstrap<HibernateValidatorConfiguration> validationBootStrap = Validation
+                        .byProvider(HibernateValidator.class);
 
-            // bootstrap to properly resolve in an OSGi environment
-            validationBootStrap
-                    .providerResolver(HibernateValidationOSGIServicesProviderResolver
-                            .getInstance());
+                // bootstrap to properly resolve in an OSGi environment
+                validationBootStrap
+                        .providerResolver(HibernateValidationOSGIServicesProviderResolver
+                                .getInstance());
 
-            final HibernateValidatorConfiguration configure = validationBootStrap
-                    .configure();
-            validatorFactory = configure./*constraintValidatorFactory (new
-                                    CDIAwareConstraintValidatorFactory ())
-                                   .*/buildValidatorFactory();
+                final HibernateValidatorConfiguration configure = validationBootStrap
+                        .configure();
+                validatorFactory = configure.buildValidatorFactory();
+            }
+            return validatorFactory;
+        } finally {
+            Thread.currentThread().setContextClassLoader(oldTccl);
         }
-        return validatorFactory;
     }
 
     public static BeanValidationProvider newProvider() {
-        return new BeanValidationProvider();
+        return new BeanValidationProvider(getValidatorFactory());
     }
 }

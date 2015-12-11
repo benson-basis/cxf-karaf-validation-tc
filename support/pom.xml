@@ -71,9 +71,9 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-validator</artifactId>
-            <version>5.2.0.Final</version>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.hibernate-validator</artifactId>
+            <version>5.0.2.Final_1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
