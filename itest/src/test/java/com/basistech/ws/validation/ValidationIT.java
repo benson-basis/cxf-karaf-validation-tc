@@ -16,6 +16,7 @@ package com.basistech.ws.validation;
 
 import com.basistech.ws.beanvalidation.OSGIValidationFactory;
 import com.google.common.io.Resources;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -29,9 +30,9 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 import org.osgi.framework.Constants;
 
 import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
 import java.io.File;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Properties;
 import java.util.concurrent.Callable;
@@ -46,7 +47,6 @@ import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.CoreOptions.when;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.configureConsole;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.debugConfiguration;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.logLevel;
@@ -127,5 +127,16 @@ public class ValidationIT {
             validator1.get();
             validator2.get();
         }
+    }
+
+    @Test
+    public void pokeService() throws Exception {
+        Thread.sleep(3000);
+        URL url = new URL("http://localhost:8181/cxf/validate");
+        HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+        connection.setRequestMethod("GET");
+        connection.connect();
+        int code = connection.getResponseCode();
+        Assert.assertEquals(200, code);
     }
 }
