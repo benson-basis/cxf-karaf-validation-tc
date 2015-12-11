@@ -90,22 +90,16 @@ public class ValidationIT {
         return options(karafDistributionConfiguration()
                         .frameworkUrl(
                                 maven()
-                                        .groupId("org.apache.karaf")
-                                        .artifactId("apache-karaf")
-                                        .type("zip")
-                                        .version(karafVersion))
+                                        .groupId("com.basistech.ws")
+                                        .artifactId("bean-validation-assembly")
+                                        .type("tar.gz")
+                                        .version(projectVersion))
                         .karafVersion(karafVersion).name("Apache Karaf")
                         .unpackDirectory(new File("target/pax"))
                         .useDeployFolder(false),
                 keepRuntimeFolder(),
                 configureConsole().ignoreLocalConsole(),
                 logLevel(LogLevelOption.LogLevel.INFO),
-                features(maven().groupId("com.basistech.ws")
-                        .artifactId("bean-validation-support")
-                        .version(projectVersion)
-                        .classifier("features")
-                        .type("xml"),
-                        "bean-validation-support"),
                 when(karafDebug).useOptions(debugConfiguration()),
                 junitBundles(),
                 systemProperty("pax.exam.osgi.unresolved.fail").value("true"),
@@ -115,7 +109,9 @@ public class ValidationIT {
 
     @Test
     public void getValidators() throws Exception {
-        OSGIValidationFactory.newValidator();
+        Validator validator = OSGIValidationFactory.newValidator();
+        ToValidate tv = new ToValidate(0);
+        validator.validate(tv);
 
         // if it doesn't throw, we're fairly happy.
         ExecutorService threadPool = Executors.newFixedThreadPool(2);
