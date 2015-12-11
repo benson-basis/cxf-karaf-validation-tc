@@ -26,13 +26,13 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 
 import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import javax.ws.rs.GET;
 import javax.ws.rs.core.Response;
 import javax.xml.ws.WebServiceException;
 import java.util.Collections;
-import java.util.Set;
 
-import static org.slf4j.LoggerFactory.*;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  *
@@ -46,15 +46,16 @@ public class TrivialService {
     public Response validate() {
 
         ToValidate tv = new ToValidate(0);
-
-        Set<ConstraintViolation<ToValidate>> constraintViolations = OSGIValidationFactory.newValidator().validate(tv);
-        if (constraintViolations.size() > 0) {
+        try {
+            OSGIValidationFactory.newProvider().validateBean(tv);
+        } catch (ConstraintViolationException cve) {
             StringBuilder violationMessages = new StringBuilder();
-            for (ConstraintViolation<ToValidate> constraintViolation : constraintViolations) {
+            for (ConstraintViolation<?> constraintViolation : cve.getConstraintViolations()) {
                 violationMessages.append(constraintViolation.getPropertyPath())
                         .append(": ").append(constraintViolation.getMessage()).append("\n");
             }
             throw new WebServiceException(violationMessages.toString());
+
         }
         return Response.ok().build();
     }

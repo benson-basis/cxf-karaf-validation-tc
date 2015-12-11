@@ -16,29 +16,22 @@ package com.basistech.ws.validation;
 
 import com.basistech.ws.beanvalidation.OSGIValidationFactory;
 import com.google.common.io.Resources;
+import org.apache.cxf.validation.BeanValidationProvider;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.ProbeBuilder;
-import org.ops4j.pax.exam.TestProbeBuilder;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.karaf.options.LogLevelOption;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
-import org.osgi.framework.Constants;
 
-import javax.validation.Validator;
 import java.io.File;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Properties;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.maven;
@@ -76,12 +69,6 @@ public class ValidationIT {
         projectVersion = props.getProperty("project.version");
     }
 
-    @ProbeBuilder
-    public TestProbeBuilder probeConfiguration(TestProbeBuilder probe) {
-        probe.setHeader(Constants.DYNAMICIMPORT_PACKAGE, "*");
-        return probe;
-    }
-
     @Configuration
     public Option[] configure() throws Exception {
         loadProps();
@@ -109,24 +96,9 @@ public class ValidationIT {
 
     @Test
     public void getValidators() throws Exception {
-        Validator validator = OSGIValidationFactory.newValidator();
+        BeanValidationProvider prov = OSGIValidationFactory.newProvider();
         ToValidate tv = new ToValidate(0);
-        validator.validate(tv);
-
-        // if it doesn't throw, we're fairly happy.
-        ExecutorService threadPool = Executors.newFixedThreadPool(2);
-        for (int x = 0; x < 1000; x++) {
-            Callable<Validator> task = new Callable<Validator>() {
-                @Override
-                public Validator call() throws Exception {
-                    return OSGIValidationFactory.newValidator();
-                }
-            };
-            Future<Validator> validator1 = threadPool.submit(task);
-            Future<Validator> validator2 = threadPool.submit(task);
-            validator1.get();
-            validator2.get();
-        }
+        prov.validateBean(tv); // should throw.
     }
 
     @Test

@@ -15,8 +15,7 @@
 */
 package com.basistech.ws.beanvalidation;
 
-import net.osgiliath.validator.osgi.ValidatorHelper;
-import javax.validation.Validator;
+import org.apache.cxf.validation.BeanValidationProvider;
 
 /**
  * utility class for using hibernate validation in OSGi.
@@ -26,7 +25,7 @@ public final class OSGIValidationFactory {
         //
     }
 
-    public static Validator newValidator() {
-        return ValidatorHelper.getValidator();
+    public static BeanValidationProvider newProvider() {
+        return new BeanValidationProvider();
     }
 }

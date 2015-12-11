@@ -94,6 +94,8 @@
                         <feature>wrap</feature>
                         <feature>war</feature>
                         <feature>cxf-jaxrs</feature>
+                        <feature>cxf-bean-validation-core</feature>
+                        <feature>cxf-bean-validation</feature>
                         <feature>scr</feature>
                         <feature>bean-validation-support</feature>
                         <feature>bean-validation-trivial-service</feature>
