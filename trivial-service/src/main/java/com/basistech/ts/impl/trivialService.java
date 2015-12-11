@@ -16,10 +16,11 @@
 
 package com.basistech.ts.impl;
 
-import com.basistech.ws.beanvalidation.OSGIValidationFactory;
+import org.apache.cxf.validation.BeanValidationProvider;
 import org.apache.cxf.endpoint.Server;
 import org.apache.cxf.jaxrs.JAXRSServerFactoryBean;
 import org.apache.cxf.jaxrs.impl.WebApplicationExceptionMapper;
+import org.apache.cxf.osgi.hibernate.validation.ValidationHelper;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -46,7 +47,7 @@ public class TrivialService {
 
         ToValidate tv = new ToValidate(0);
         try {
-            OSGIValidationFactory.newProvider().validateBean(tv);
+            new BeanValidationProvider(ValidationHelper.getValidatorFactory()).validateBean(tv);
         } catch (ConstraintViolationException cve) {
             StringBuilder violationMessages = new StringBuilder();
             for (ConstraintViolation<?> constraintViolation : cve.getConstraintViolations()) {

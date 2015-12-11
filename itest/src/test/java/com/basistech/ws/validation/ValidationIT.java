@@ -14,9 +14,7 @@
 
 package com.basistech.ws.validation;
 
-import com.basistech.ws.beanvalidation.OSGIValidationFactory;
 import com.google.common.io.Resources;
-import org.apache.cxf.validation.BeanValidationProvider;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,7 +25,6 @@ import org.ops4j.pax.exam.karaf.options.LogLevelOption;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 
-import javax.validation.ConstraintViolationException;
 import java.io.File;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -93,13 +90,6 @@ public class ValidationIT {
                 systemProperty("pax.exam.osgi.unresolved.fail").value("true"),
                 systemProperty("org.ops4j.pax.exam.rbc.rmi.host").value("localhost")
         );
-    }
-
-    @Test(expected = ConstraintViolationException.class)
-    public void getValidators() throws Exception {
-        BeanValidationProvider prov = OSGIValidationFactory.newProvider();
-        ToValidate tv = new ToValidate(0);
-        prov.validateBean(tv); // should throw.
     }
 
     @Test

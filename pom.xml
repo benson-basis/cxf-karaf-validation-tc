@@ -29,7 +29,6 @@
         <pax-exam-version>4.6.0</pax-exam-version>
     </properties>
     <modules>
-        <module>support</module>
         <module>trivial-service</module>
         <module>assembly</module>
         <module>itest</module>
