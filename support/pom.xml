@@ -71,6 +71,12 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>5.2.0.Final</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.servicemix.specs</groupId>
             <artifactId>org.apache.servicemix.specs.jsr303-api-1.1.0</artifactId>
             <scope>provided</scope>

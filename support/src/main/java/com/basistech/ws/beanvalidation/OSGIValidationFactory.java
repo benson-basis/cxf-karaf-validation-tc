@@ -16,13 +16,44 @@
 package com.basistech.ws.beanvalidation;
 
 import org.apache.cxf.validation.BeanValidationProvider;
+import org.hibernate.validator.HibernateValidator;
+import org.hibernate.validator.HibernateValidatorConfiguration;
+
+import javax.validation.Validation;
+import javax.validation.ValidatorFactory;
+import javax.validation.bootstrap.ProviderSpecificBootstrap;
 
 /**
  * utility class for using hibernate validation in OSGi.
  */
 public final class OSGIValidationFactory {
+    static ValidatorFactory validatorFactory;
+
     private OSGIValidationFactory() {
         //
+    }
+
+    /**
+     * returns the validatorfactory.
+     * @return the singleton validatorfactory
+     */
+    public static synchronized ValidatorFactory getValidatorFactory() {
+        if (validatorFactory == null) {
+            final ProviderSpecificBootstrap<HibernateValidatorConfiguration> validationBootStrap = Validation
+                    .byProvider(HibernateValidator.class);
+
+            // bootstrap to properly resolve in an OSGi environment
+            validationBootStrap
+                    .providerResolver(HibernateValidationOSGIServicesProviderResolver
+                            .getInstance());
+
+            final HibernateValidatorConfiguration configure = validationBootStrap
+                    .configure();
+            validatorFactory = configure./*constraintValidatorFactory (new
+                                    CDIAwareConstraintValidatorFactory ())
+                                   .*/buildValidatorFactory();
+        }
+        return validatorFactory;
     }
 
     public static BeanValidationProvider newProvider() {
